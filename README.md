@@ -1,2 +1,2 @@
-# the-simplest-motion-model
+# The-simplest-motion-model
 This repository contains a simple simulation of motion accounting for air resistance.
