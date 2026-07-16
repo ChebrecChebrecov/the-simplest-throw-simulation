@@ -142,7 +142,7 @@ canvas.pack()
 drawables = []
 updatables = []
 hittables = []
-time_text = canvas.create_text(300, 200, text="Осталось: 20.0", font=('Comic Sans', 12), fill="blue")
+time_text = canvas.create_text(300, 200, text=" ", font=('Times New Roman', 12), fill="blue")
 dt = 1 / 500
 ball = 0
 def create_walls():
