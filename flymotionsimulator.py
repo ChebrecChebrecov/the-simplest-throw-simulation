@@ -1,5 +1,7 @@
 import tkinter as tk
 import math
+PPM = 10
+G = 9.8
 class Drawable:
     def __init__(self, canvas):
         self.canvas = canvas
@@ -36,16 +38,11 @@ class Rect(Drawable, Updatable, Hittable):
     def update(self, dt):
         pass
     def check_hit(self, other):
-        if not isinstance(other,Ball):
+        if not isinstance(other, Ball):
             return None
-        if isinstance(other,Ball):
-            obj_x = other.pos.x
-            obj_y = other.pos.y
-            r = other.radius
-        else:
-            obj_x = other.pos.x
-            obj_y = other.pos.y
-            r = other.radius
+        obj_x = other.pos.x * PPM
+        obj_y = other.pos.y * PPM
+        r = other.radius * PPM
         closest_x = max(self.rect.x, min(obj_x, self.rect.x + self.rect.width))
         closest_y = max(self.rect.y, min(obj_y, self.rect.y + self.rect.height))
         dx = obj_x - closest_x
@@ -62,43 +59,57 @@ class Rect(Drawable, Updatable, Hittable):
         self.rect.y = y
         self.canvas.coords(self.id, *self.rect.get_coords())
 class Ball(Drawable, Updatable, Hittable):
-    def __init__(self, canvas, x, y, radius=10):
+    def __init__(self, canvas, x, y, radius=0.02):
         Drawable.__init__(self, canvas)
-        self.pos = Point(30, 780)
-        self.vel = Point(500, -900)
-        self.k = 0.001
-        self.resis = self.k * (self.vel.x**2 + self.vel.y**2)
-        self.acc = Point(-1*self.resis*self.vel.x/((self.vel.x**2 + self.vel.y**2)**(0.5)), 9.8-self.resis*self.vel.y/((self.vel.x**2 + self.vel.y**2)**(0.5)))
-        if self.acc.x < 0:
-            self.acc.x = 0
+        self.pos = Point(3.0, 78.0)
+        self.vel = Point(10.0, -35.0)
+        self.k = 0.003
         self.radius = radius
         self.on_ground = False
+        self.acc = Point(0, 0)
+        self.update_acceleration()
+        #self.trail = 0
         self.draw()
+    def update_acceleration(self):
+        speed = math.hypot(self.vel.x, self.vel.y)
+        drag_coeff = self.k * speed
+        self.acc.x = -drag_coeff * self.vel.x
+        self.acc.y = G - drag_coeff * self.vel.y
     def draw(self):
         for part_id in self.parts:
             self.canvas.delete(part_id)
         self.parts = []
-        x, y = self.pos.x, self.pos.y
-        r = self.radius
-        body = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill='purple')
+        x = self.pos.x * PPM
+        y = self.pos.y * PPM
+        r = self.radius * PPM
+        body = self.canvas.create_oval(x - r, y - r, x + r, y + r, fill='purple')
         self.parts.append(body)
         self.id = body
-        self.canvas.create_oval(x, y, x+5, y+5, fill='red')
+        #self.trail +=1
+        #if self.trail > 20:
+        #    body = self.canvas.create_oval(x, y, x + 0.01, y + 0.01, fill='red')
+        #    self.trail = 0
     def update(self, dt):
+        self.update_acceleration()
         self.vel.x += self.acc.x * dt
         self.vel.y += self.acc.y * dt
         self.pos.x += self.vel.x * dt + 0.5 * self.acc.x * dt * dt
         self.pos.y += self.vel.y * dt + 0.5 * self.acc.y * dt * dt
+        field_width = 2000 / PPM
+        field_height = 1000 / PPM
         if self.pos.x < self.radius:
             self.pos.x = self.radius
-            self.vel.x = 0
-        elif self.pos.x > 2000 - self.radius:
-            self.pos.x = 2000 - self.radius
-            self.vel.x = 0
-        if self.pos.y > 1000 - self.radius:
-            self.pos.y = 1000 - self.radius
-            self.vel.y = 0
+            self.vel.x = -self.vel.x * 0
+        elif self.pos.x > field_width - self.radius:
+            self.pos.x = field_width - self.radius
+            self.vel.x = -self.vel.x * 0
+        if self.pos.y > field_height - self.radius:
+            self.pos.y = field_height - self.radius
+            self.vel.y = -self.vel.y * 0
             self.on_ground = True
+        elif self.pos.y < self.radius:
+            self.pos.y = self.radius
+            self.vel.y = -self.vel.y * 0
         self.draw()
     def check_hit(self, other):
         if isinstance(other, Ball):
@@ -121,20 +132,21 @@ class Ball(Drawable, Updatable, Hittable):
     def bounce(self, rect, side):
         if side == "horizontal":
             self.vel.x = -self.vel.x / 2
-            if self.pos.x < rect.rect.x:
-                self.pos.x = rect.rect.x - self.radius
+            if self.pos.x * PPM < rect.rect.x:
+                self.pos.x = (rect.rect.x - self.radius * PPM) / PPM
             else:
-                self.pos.x = rect.rect.x + rect.rect.width + self.radius
+                self.pos.x = (rect.rect.x + rect.rect.width + self.radius * PPM) / PPM
         elif side == "vertical":
             self.vel.x = 0
             if self.vel.y > 0:
                 self.vel.y = 0
                 self.acc.x = 0
-            if self.pos.y < rect.rect.y:
-                self.pos.y = rect.rect.y - self.radius
+            if self.pos.y * PPM < rect.rect.y:
+                self.pos.y = (rect.rect.y - self.radius * PPM) / PPM
                 self.on_ground = True
             else:
-                self.pos.y = rect.rect.y + rect.rect.height + self.radius
+                self.pos.y = (rect.rect.y + rect.rect.height + self.radius * PPM) / PPM
+        self.update_acceleration()
 root = tk.Tk()
 root.title("FlyMotion")
 canvas = tk.Canvas(root, width=2000, height=1000, bg='white')
@@ -153,7 +165,7 @@ def create_walls():
         hittables.append(wall)
 def create_ball():
     global ball
-    ball = Ball(canvas, 500, 400, radius=20)
+    ball = Ball(canvas, 500, 400, radius=0.2)
     drawables.append(ball)
     updatables.append(ball)
     hittables.append(ball)
@@ -167,7 +179,8 @@ def update():
             side = obj.check_hit(ball)
             if side:
                 ball.bounce(obj, side)
-        canvas.itemconfig(time_text, text=f"dX, dY: {ball.pos.x-30:.1f},  {-ball.pos.y+780:.1f}")
+        height_m = 100 - ball.pos.y
+        canvas.itemconfig(time_text, text=f"X: {ball.pos.x:.2f} м, Y: {height_m:.2f} м, Vx: {ball.vel.x:.2f}, Vy: {ball.vel.y:.2f}")
         root.after(1, update)
 canvas.focus_set()
 create_walls()
