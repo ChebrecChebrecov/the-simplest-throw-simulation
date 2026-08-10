@@ -3,7 +3,7 @@ This repository contains a simple simulation of motion accounting for air resist
 ## Work-in-progress features:
 ### Metrics - Completed!
 The measurement system will be converted to metric in the near future
-### Dynamic coefficient
+### Dynamic coefficient - Completed!
 Air resistance coefficient will be calculated by changeable characteristics: sail area of the moving object, air density, mass of the moving object
 ### Liquid simulation
 The model will be able to calculate the simplified trajectory of flying liquids
