@@ -2,6 +2,25 @@ import tkinter as tk
 import math
 PPM = 10
 G = 9.8
+AIRDENSITY = 1.2
+print("Input the number to select the form of the object")
+print("1 - Sphere, 2 - Circle cylinder, 3 - Disk, 4 - Teardrop, 5 - Hemisphere(cup facing the flow), 6 - Hemisphere(cup against the flow), 7 - Cube")
+s = int(input())
+if s == 1:
+    DRAGCOEFF = 0.47
+elif s == 2:
+    DRAGCOEFF = 1.1
+elif s == 3:
+    DRAGCOEFF = 1.15
+elif s == 4:
+    DRAGCOEFF = 0.045
+elif s == 5:
+    DRAGCOEFF = 1.35
+elif s == 6:
+    DRAGCOEFF = 0.4
+elif s == 7:
+    DRAGCOEFF = 1.05
+
 class Drawable:
     def __init__(self, canvas):
         self.canvas = canvas
@@ -61,9 +80,15 @@ class Rect(Drawable, Updatable, Hittable):
 class Ball(Drawable, Updatable, Hittable):
     def __init__(self, canvas, x, y, radius=0.02):
         Drawable.__init__(self, canvas)
-        self.pos = Point(3.0, 78.0)
-        self.vel = Point(10.0, -35.0)
-        self.k = 0.003
+        print("Input the coordinates(in axes x(from 0 to 200) and y(from 0 to 100)) of the object, m")
+        self.pos = Point(3.0+float(input()), 78.0-float(input()))
+        print("Input the speed(in axes x and y) of the object, m/s")
+        self.vel = Point(float(input()), -1*float(input()))
+        print("Input the mass of the object, kg")
+        self.mass = float(input())
+        print("Input the mid-section area of the object, m^2")
+        self.midsectionarea = float(input())
+        self.k = 1/2 * DRAGCOEFF * AIRDENSITY * self.midsectionarea
         self.radius = radius
         self.on_ground = False
         self.acc = Point(0, 0)
@@ -72,9 +97,9 @@ class Ball(Drawable, Updatable, Hittable):
         self.draw()
     def update_acceleration(self):
         speed = math.hypot(self.vel.x, self.vel.y)
-        drag_coeff = self.k * speed
-        self.acc.x = -drag_coeff * self.vel.x
-        self.acc.y = G - drag_coeff * self.vel.y
+        self.coeff = self.k * speed
+        self.acc.x = (-self.coeff * self.vel.x)/self.mass
+        self.acc.y = G - self.coeff * self.vel.y/self.mass
     def draw(self):
         for part_id in self.parts:
             self.canvas.delete(part_id)
@@ -95,7 +120,7 @@ class Ball(Drawable, Updatable, Hittable):
         self.vel.y += self.acc.y * dt
         self.pos.x += self.vel.x * dt + 0.5 * self.acc.x * dt * dt
         self.pos.y += self.vel.y * dt + 0.5 * self.acc.y * dt * dt
-        field_width = 2000 / PPM
+        field_width = 8000 / PPM
         field_height = 1000 / PPM
         if self.pos.x < self.radius:
             self.pos.x = self.radius
@@ -149,7 +174,7 @@ class Ball(Drawable, Updatable, Hittable):
         self.update_acceleration()
 root = tk.Tk()
 root.title("FlyMotion")
-canvas = tk.Canvas(root, width=2000, height=1000, bg='white')
+canvas = tk.Canvas(root, width=8000, height=1000, bg='white')
 canvas.pack()
 drawables = []
 updatables = []
@@ -158,7 +183,7 @@ time_text = canvas.create_text(300, 200, text=" ", font=('Times New Roman', 12),
 dt = 1 / 500
 ball = 0
 def create_walls():
-    walls = [(0, 800, 2000, 200)]
+    walls = [(0, 800, 8000, 200)]
     for x, y, w, h in walls:
         wall = Rect(canvas, x, y, w, h, color='green')
         drawables.append(wall)
@@ -174,16 +199,27 @@ def update():
         obj.update(dt)
     if ball:
         for obj in hittables:
-            if obj is ball:
-                continue
+            if obj is ball:                continue
             side = obj.check_hit(ball)
             if side:
                 ball.bounce(obj, side)
-        height_m = 100 - ball.pos.y
-        canvas.itemconfig(time_text, text=f"X: {ball.pos.x:.2f} м, Y: {height_m:.2f} м, Vx: {ball.vel.x:.2f}, Vy: {ball.vel.y:.2f}")
+        x = ball.pos.x - 3
+        y = 100 - ball.pos.y-20.2
+        canvas.itemconfig(time_text, text=f"X: {x:.2f} м, Y: {y:.2f} м, Vx: {ball.vel.x:.2f}, Vy: {ball.vel.y:.2f}")
         root.after(1, update)
+count = 5
+def countdown():
+    global count
+    if count > 0:
+        canvas.delete('countdown')
+        canvas.create_text(400, 500, text=str(count),font=('Times New Roman', 48),fill='red', tags='countdown')
+        count -= 1
+        root.after(1000, countdown)
+    else:
+        canvas.delete('countdown')
+        update()
 canvas.focus_set()
 create_walls()
 create_ball()
-update()
+countdown()
 root.mainloop()
