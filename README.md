@@ -1,5 +1,6 @@
 # The-simplest-throw-simulation
 This repository contains a simple simulation of motion accounting for air resistance on Python with visualisation provided by tkinter
+<img width="1920" height="1080" alt="FlyMotionExample" src="https://github.com/user-attachments/assets/1d47bb32-64c3-46ec-8ebb-694437e331a7" />
 ## Work-in-progress features:
 ### Metrics - Completed!
 The measurement system will be converted to metric in the near future
