@@ -205,7 +205,7 @@ def update():
                 ball.bounce(obj, side)
         x = ball.pos.x - 3
         y = 100 - ball.pos.y-20.2
-        canvas.itemconfig(time_text, text=f"X: {x:.2f} м, Y: {y:.2f} м, Vx: {ball.vel.x:.2f}, Vy: {ball.vel.y:.2f}")
+        canvas.itemconfig(time_text, text=f"X: {x:.2f} m, Y: {y:.2f} m, Vx: {ball.vel.x:.2f}, Vy: {ball.vel.y:.2f}")
         root.after(1, update)
 count = 5
 def countdown():
