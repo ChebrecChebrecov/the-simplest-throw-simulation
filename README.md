@@ -1,4 +1,7 @@
-# The-simplest-throw-simulation
+# The simplest throw simulation
+[![Python 3.7+](https://img.shields.io/badge/Python-3.7%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This repository contains a simple simulation of motion accounting for air resistance on Python with visualisation provided by tkinter
 <img width="1920" height="1080" alt="FlyMotionExample" src="https://github.com/user-attachments/assets/1d47bb32-64c3-46ec-8ebb-694437e331a7" />
 ## Calibration Parameters
