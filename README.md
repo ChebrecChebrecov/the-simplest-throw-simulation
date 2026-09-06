@@ -19,3 +19,5 @@ Air resistance coefficient will be calculated by changeable characteristics: sai
 The model will be able to calculate the simplified trajectory of flying liquids
 ### Explosive objects
 The model will be able to calculate the simplified trajectory of objects that explode mid-flight.
+### Speed dynamic
+The program will include a dependence graph of speed as a function of time
